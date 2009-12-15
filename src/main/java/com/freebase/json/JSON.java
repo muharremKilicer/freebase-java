@@ -166,6 +166,24 @@ public class JSON {
         }
     }
         
+    public String toString() {
+        switch (this.type) {
+            case BOOLEAN:
+                return Boolean.toString(this.bool);
+            case STRING:
+                return this.string;
+            case NUMBER:
+                return this.number.toString();
+            case ARRAY:
+                return this.array.toJSONString();
+            case OBJECT:
+                return this.obj.toJSONString();
+            default:
+                // this should never happen but just in case
+                throw new RuntimeException("Don't recognize this object type: " + this.type);
+        }
+    }
+    
     public String string() {
         if (this.type != Type.STRING) {
             throw new RuntimeException("This is not a String, it's a " + this.type);

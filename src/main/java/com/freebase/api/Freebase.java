@@ -74,8 +74,8 @@ import com.freebase.json.JSON;
  */
 public class Freebase extends JSONTransport {
 
-    private static final String FREEBASE_API_URL         = "http://api.freebase.com/";
-    private static final String FREEBASE_SANDBOX_API_URL = "http://api.freebase-sandbox.com/";
+    private static final String FREEBASE_API_URL         = "http://api.freebase.com";
+    private static final String FREEBASE_SANDBOX_API_URL = "http://api.freebase-sandbox.com";
 
     private static final String LOGIN_API     = "/api/account/login";
     private static final String MQLREAD_API   = "/api/service/mqlread";
@@ -171,7 +171,11 @@ public class Freebase extends JSONTransport {
     }
     
     // -------------------- MQL read -------------------------------
-    
+
+    public JSON mqlread(Object query) {
+        return mqlread(query, null, null);
+    }
+
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
@@ -179,13 +183,17 @@ public class Freebase extends JSONTransport {
     public JSON mqlread(Object query, JSONObject envelope, Map<String,String> params) {
         if (query == null) throw new FreebaseException("Query can't be null");
         if (envelope == null) envelope = new JSONObject();
-        envelope.put("query", strinfigyJSON(query));
-        envelope.put("escape","false");
+        envelope.put("query", jsonize(query));
+        envelope.put("escape",false);
 
         List<NameValuePair> qparams = transform_params(params);
         qparams.add(new BasicNameValuePair("query",envelope.toJSONString()));
 
         return invoke(MQLREAD_API,qparams);
+    }
+
+    public JSON mqlread_multiple(Map<String,Object> queries) {
+        return mqlread_multiple(queries, null, null);
     }
     
     /**
@@ -201,8 +209,8 @@ public class Freebase extends JSONTransport {
         for (Map.Entry<String,Object> entry : queries.entrySet()) {
             JSONObject envelope = envelopes.get(entry.getKey());
             if (envelope == null) envelope = new JSONObject();
-            envelope.put("query", strinfigyJSON(entry.getValue()));
-            envelope.put("escape","false");
+            envelope.put("query", jsonize(entry.getValue()));
+            envelope.put("escape",false);
             q.put(entry.getKey(), envelope);
         }
 
@@ -333,8 +341,8 @@ public class Freebase extends JSONTransport {
         if (this.credential_cookie == null) throw new FreebaseException("Can't write without being signed in");
         if (query == null) throw new FreebaseException("Query can't be null");
         if (envelope == null) envelope = new JSONObject();
-        envelope.put("query", strinfigyJSON(query));
-        envelope.put("escape","false");
+        envelope.put("query", jsonize(query));
+        envelope.put("escape",false);
 
         List<NameValuePair> qparams = transform_params(params);
         qparams.add(new BasicNameValuePair("query",envelope.toJSONString()));
