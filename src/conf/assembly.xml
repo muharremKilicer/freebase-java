@@ -1,0 +1,25 @@
+<assembly>
+  <id></id>
+  <formats>
+    <format>tar.gz</format>
+    <format>zip</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <includes>
+        <include>*.txt</include>
+        <include>*.xml</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src</directory>
+      <outputDirectory>src</outputDirectory>
+      <includes>
+        <include>**</include>
+      </includes>
+      <excludes>
+        <exclude>conf/**</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>  
