@@ -49,8 +49,8 @@ import org.json.simple.JSONObject;
  * 
  * <pre>   String a = b.get("c").get(1).get("d").get(3).string();</pre>
  *    
- * which a lot more verbose but still better than having to 
- * deal with all the casting between Map and List and String.
+ * which is a lot more verbose but still better than having to 
+ * deal with all the casting between Map and List and String by hand.
  */
 public class JSON {
 
