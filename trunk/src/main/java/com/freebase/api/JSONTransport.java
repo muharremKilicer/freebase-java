@@ -224,19 +224,26 @@ abstract class JSONTransport {
         return qparams;
     }
 
-    protected static String strinfigyJSON(Object json) {
+    protected static JSONAware jsonize(Object json) {
         if (json instanceof String) {
             JSONParser parser = new JSONParser();
             try {
                 json = parser.parse((String) json);
+                if (!(json instanceof JSONAware)) {
+                    throw new FreebaseException("Top level JSON object must be an object or an array");
+                }
             } catch (ParseException e) {
-                throw new FreebaseException("Error during parsing, make sure it's a valid JSON object.", e);
+                throw new FreebaseException("Error during parsing, make sure it's a valid JSON object: " + e.getMessage());
             }
         }
-        if (json instanceof JSONAware) {
-            throw new FreebaseException("Object must be a String, a JSONator or a JSONArray");
+        if (json instanceof JSON) {
+            JSON j = (JSON) json;
+            if (!j.isContainer()) {
+                throw new FreebaseException("Top level JSON object an object or an array");
+            }
+            json = (j.isArray()) ? j.array() : j.obj();
         }
-        return ((JSONAware) json).toJSONString();
+        return (JSONAware) json;
     }
     
     private JSON check_result(JSON result) {
