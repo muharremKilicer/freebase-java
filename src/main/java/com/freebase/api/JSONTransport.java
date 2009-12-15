@@ -55,11 +55,12 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import com.freebase.json.JSON;
 
 abstract class JSONTransport {
 
@@ -76,19 +77,19 @@ abstract class JSONTransport {
     
     // ------------------------------------------------------------------------------
     
-    protected JSONObject get(String uri) {
+    protected JSON get(String uri) {
         return get(uri, null, false);
     }
     
-    protected JSONObject get(URI uri) {
+    protected JSON get(URI uri) {
         return get(uri, null, false);
     }
 
-    protected JSONObject get(String uri, Map<String,String> headers) {
+    protected JSON get(String uri, Map<String,String> headers) {
         return get(uri, headers, false);
     }
     
-    protected JSONObject get(String uri, Map<String,String> headers, boolean sign) {
+    protected JSON get(String uri, Map<String,String> headers, boolean sign) {
         try {
             return get(new URI(uri), headers, sign);
         } catch (URISyntaxException e) {
@@ -96,20 +97,20 @@ abstract class JSONTransport {
         }
     }
 
-    protected JSONObject get(URI uri, Map<String,String> headers, boolean sign) {
+    protected JSON get(URI uri, Map<String,String> headers, boolean sign) {
         if (headers == null) headers = new HashMap<String,String>();
         return check_result(urlfetch(uri,GET,headers,null,sign));
     }
     
-    protected JSONObject post(String uri, CharSequence content) {
+    protected JSON post(String uri, CharSequence content) {
         return post(uri, null, content, false);
     }
 
-    protected JSONObject post(String uri, Map<String,String> headers, CharSequence content) {
+    protected JSON post(String uri, Map<String,String> headers, CharSequence content) {
         return post(uri, headers, content, false);
     }
     
-    protected JSONObject post(String uri, Map<String,String> headers, CharSequence content, boolean sign) {
+    protected JSON post(String uri, Map<String,String> headers, CharSequence content, boolean sign) {
         try {
             return post(new URI(uri), headers, content, sign);
         } catch (URISyntaxException e) {
@@ -117,15 +118,15 @@ abstract class JSONTransport {
         }
     }
     
-    protected JSONObject post(URI uri, CharSequence content) {
+    protected JSON post(URI uri, CharSequence content) {
         return post(uri, null, content, false);
     }
 
-    protected JSONObject post(URI uri, Map<String,String> headers, CharSequence content) {
+    protected JSON post(URI uri, Map<String,String> headers, CharSequence content) {
         return post(uri, headers, content, false);
     }
 
-    protected JSONObject post(URI uri, Map<String,String> headers, CharSequence content, boolean sign) {
+    protected JSON post(URI uri, Map<String,String> headers, CharSequence content, boolean sign) {
         if (headers == null) headers = new HashMap<String,String>();
         if (!headers.containsKey("content-type")) {
             headers.put("content-type","application/x-www-form-urlencoded");
@@ -134,8 +135,8 @@ abstract class JSONTransport {
         return check_result(urlfetch(uri,POST,headers,content,sign));
     }
 
-    private JSONObject urlfetch(URI uri, int protocol, Map<String,String> headers, CharSequence content, boolean sign) {
-        JSONObject result = null;
+    private JSON urlfetch(URI uri, int protocol, Map<String,String> headers, CharSequence content, boolean sign) {
+        JSON result = null;
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpRequestBase method = null;
@@ -156,9 +157,9 @@ abstract class JSONTransport {
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 JSONParser parser = new JSONParser();
-                result = (JSONObject) parser.parse(new InputStreamReader(entity.getContent(),"UTF-8"));
+                result = new JSON(parser.parse(new InputStreamReader(entity.getContent(),"UTF-8")));
             } else {
-                result = new JSONObject();
+                result = new JSON(new JSONObject());
             }
         } catch (ClientProtocolException e) {
             throw new FreebaseException(e);
@@ -174,11 +175,11 @@ abstract class JSONTransport {
         return check_result(result);
     }
     
-    protected JSONObject invoke(String path, List<NameValuePair> params) {
+    protected JSON invoke(String path, List<NameValuePair> params) {
         return invoke(path, params, false);
     }
     
-    protected JSONObject invoke(String path, List<NameValuePair> params, boolean sign) { 
+    protected JSON invoke(String path, List<NameValuePair> params, boolean sign) { 
         String content = URLEncodedUtils.format(params, "UTF-8");
         
         String url = getURL(path);
@@ -233,15 +234,15 @@ abstract class JSONTransport {
             }
         }
         if (json instanceof JSONAware) {
-            throw new FreebaseException("Object must be a String, a JSONObject or a JSONArray");
+            throw new FreebaseException("Object must be a String, a JSONator or a JSONArray");
         }
         return ((JSONAware) json).toJSONString();
     }
     
-    private JSONObject check_result(JSONObject result) {
+    private JSON check_result(JSON result) {
 
-        String status = (String) result.get("status");
-        String code = (String) result.get("code");
+        String status = result.get("status").string();
+        String code = result.get("code").string();
         
         if (!"200 OK".equals(status) || !"/api/status/ok".equals(code)) {
 
@@ -249,10 +250,9 @@ abstract class JSONTransport {
             if (!"200 OK".equals(status)) {
                 message = "HTTP error: " + status;
             } else {
-                JSONArray messages = (JSONArray) result.get("messages");
-                JSONObject firstMessage = (JSONObject) messages.get(0);
-                if (firstMessage.containsKey("message")) {
-                    message = code + ": " + firstMessage.get("message");
+                JSON firstMessage = result.get("messages").get(0);
+                if (firstMessage.has("message")) {
+                    message = code + ": " + firstMessage.get("message").string();
                 }
             }
 

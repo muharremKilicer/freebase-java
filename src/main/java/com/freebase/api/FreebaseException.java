@@ -30,15 +30,15 @@
 
 package com.freebase.api;
 
-import org.json.simple.JSONObject;
+import com.freebase.json.JSON;
 
 public class FreebaseException extends RuntimeException {
 
     private static final long serialVersionUID = 7521456388426850609L;
 
-    private JSONObject result;
+    private JSON result;
     
-    public FreebaseException(String message, JSONObject result) {
+    public FreebaseException(String message, JSON result) {
         super(message);
         this.result = result;
     }
@@ -55,7 +55,7 @@ public class FreebaseException extends RuntimeException {
         super(e);
     }
     
-    public JSONObject getResult() {
+    public JSON getResult() {
         return result;
     }
 }
