@@ -1,5 +1,7 @@
 package com.freebase.json.tests;
 
+import static com.freebase.json.JSON.a;
+import static com.freebase.json.JSON.o;
 import static org.junit.Assert.assertTrue;
 
 import org.json.simple.JSONObject;
@@ -8,6 +10,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.freebase.json.JSON;
+
 
 public class Tests {
 
@@ -28,7 +31,7 @@ public class Tests {
     }
     
     @Test public void testJSON2() throws ParseException {
-        JSON j1 = JSON.a(JSON.o("a",1,"b",true,"c",null,"d",JSON.o("a1",JSON.a("blah"))));
+        JSON j1 = a(o("a",1,"b",true,"c",null,"d",o("a1",a("blah"))));
         JSONParser parser = new JSONParser();
         JSON j2 = new JSON(parser.parse(query2));
         assertTrue(j1.toString().equals(j2.toString()));
