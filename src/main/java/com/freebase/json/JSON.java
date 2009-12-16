@@ -69,7 +69,7 @@ public class JSON {
     private String string;
     private Number number;
     private boolean bool;
-    
+
     // --------------------------------------------------
     
     public JSON(Object o) {
@@ -183,6 +183,24 @@ public class JSON {
                 throw new RuntimeException("Don't recognize this object type: " + this.type);
         }
     }
+
+    public Object value() {
+        switch (this.type) {
+            case BOOLEAN:
+                return this.bool;
+            case STRING:
+                return this.string;
+            case NUMBER:
+                return this.number;
+            case ARRAY:
+                return this.array;
+            case OBJECT:
+                return this.obj;
+            default:
+                // this should never happen but just in case
+                throw new RuntimeException("Don't recognize this object type: " + this.type);
+        }
+    }
     
     public String string() {
         if (this.type != Type.STRING) {
@@ -237,4 +255,84 @@ public class JSON {
     public boolean isContainer() {
         return (this.type == Type.OBJECT || this.type == Type.ARRAY);
     }
+    
+    public Type type() {
+        return this.type;
+    }
+        
+    // -----------------------------------------------------------------------------------
+        
+    public static JSON o() {
+        return new JSON(new JSONObject());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static JSON o(Object... objs) {
+        JSONObject obj = new JSONObject();
+        Object k = null;
+        for (Object o : objs) {
+            if (k == null) {
+                k = o;
+            } else {
+                if (o instanceof JSON) {
+                    o = ((JSON) o).value();
+                }
+                obj.put(k.toString(),o);
+                k = null;
+            }
+        }
+        if (k != null) {
+            throw new RuntimeException("Odd number of arguments, make sure you didn't forget something in your key/value pairs");
+        }
+        return new JSON(obj);
+    }
+    
+    public static JSON a() {
+        return new JSON(new JSONArray());
+    }
+        
+    @SuppressWarnings("unchecked")
+    public static JSON a(Object... objs) {
+        JSONArray a = new JSONArray();
+        for (Object o : objs) {
+            if (o instanceof JSON) {
+                o = ((JSON) o).value();
+            }
+            a.add(o);
+        }
+        return new JSON(a);
+    }
+    
+    public JSON put(Object k, Object v) {
+        return _(k,v);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public JSON _(Object k, Object v) {
+        if (this.type != Type.OBJECT) {
+            throw new RuntimeException("can't add key/value pairs to non-objects types");
+        }
+        if (v instanceof JSON) {
+            v = ((JSON) v).value();
+        }
+        this.obj.put(k.toString(), v);
+        return this;
+    }
+
+    public JSON put(Object o) {
+        return _(o);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public JSON _(Object o) {
+        if (this.type != Type.ARRAY) {
+            throw new RuntimeException("can't add a single value an object type");
+        }
+        if (o instanceof JSON) {
+            o = ((JSON) o).value();
+        }
+        this.array.add(o);
+        return this;
+    }
+    
 }
