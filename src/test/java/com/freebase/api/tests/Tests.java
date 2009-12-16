@@ -1,5 +1,6 @@
 package com.freebase.api.tests;
 
+import static com.freebase.json.JSON.o;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -11,7 +12,7 @@ public class Tests {
         
     @Test public void testMQLRead() {
         Freebase freebase = Freebase.getFreebase();
-        JSON query = JSON.o("id",null,"limit",1);
+        JSON query = o("id",null,"limit",1);
         JSON response = freebase.mqlread(query);
         assertTrue("/user/root".equals(response.get("result").get("id").string()));
     }
