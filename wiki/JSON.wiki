@@ -120,14 +120,27 @@ get() can be used for both objects and arrays, the first with string keys and th
 
 Another useful feature is to be able to modify a JSON object after you've created it or obtained it by parsing.
 
-The JSON wrapper provides you two methods JSON.put() and JSON.del() that you can use to modify an existing JSON object, so for example
+The JSON wrapper provides you two methods JSON.put() and JSON.del() that you can use to modify an existing JSON object, so for example you can delete parts of a json object like this
 
 {{{ 
   JSON json = JSON.o("a","b","c",JSON.a("1","2"));
   String s = json.get("c").del(2).toString(); 
 }}}
 
-will return s as 
+that will return s as 
+
+{{{
+  {"a":"b","c":["1"]}
+}}}
+
+or you can add new data to it like this
+
+{{{ 
+  JSON json = JSON.o("a","b");
+  String s = json.put("c",JSON.a("1")).toString(); 
+}}}
+
+that will return s as 
 
 {{{
   {"a":"b","c":["1"]}
