@@ -49,7 +49,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
 
 import com.freebase.json.JSON;
 
@@ -179,15 +178,14 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    @SuppressWarnings("unchecked")
-    public JSON mqlread(Object query, JSONObject envelope, Map<String,String> params) {
+    public JSON mqlread(Object query, JSON envelope, Map<String,String> params) {
         if (query == null) throw new FreebaseException("Query can't be null");
-        if (envelope == null) envelope = new JSONObject();
+        if (envelope == null) envelope = JSON.o();
         envelope.put("query", jsonize(query));
         envelope.put("escape",false);
 
         List<NameValuePair> qparams = transform_params(params);
-        qparams.add(new BasicNameValuePair("query",envelope.toJSONString()));
+        qparams.add(new BasicNameValuePair("query",envelope.toString()));
 
         return invoke(MQLREAD_API,qparams);
     }
@@ -199,23 +197,22 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    @SuppressWarnings("unchecked")
-    public JSON mqlread_multiple(Map<String,Object> queries, Map<String,JSONObject> envelopes, Map<String,String> params) {
+    public JSON mqlread_multiple(Map<String,Object> queries, Map<String,JSON> envelopes, Map<String,String> params) {
         if (queries == null || queries.size() == 0) throw new FreebaseException("Query can't be null or empty");
-        if (envelopes == null) envelopes = new HashMap<String,JSONObject>();
+        if (envelopes == null) envelopes = new HashMap<String,JSON>();
         
-        JSONObject q = new JSONObject();
+        JSON q = JSON.o();
         
         for (Map.Entry<String,Object> entry : queries.entrySet()) {
-            JSONObject envelope = envelopes.get(entry.getKey());
-            if (envelope == null) envelope = new JSONObject();
+            JSON envelope = envelopes.get(entry.getKey());
+            if (envelope == null) envelope = JSON.o();
             envelope.put("query", jsonize(entry.getValue()));
             envelope.put("escape",false);
             q.put(entry.getKey(), envelope);
         }
 
         List<NameValuePair> qparams = transform_params(params);
-        qparams.add(new BasicNameValuePair("queries",q.toJSONString()));
+        qparams.add(new BasicNameValuePair("queries",q.toString()));
 
         return invoke(MQLREAD_API,qparams);
     }
@@ -336,16 +333,15 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/mqlwrite
      */
-    @SuppressWarnings("unchecked")
-    public JSON mqlwrite(Object query, JSONObject envelope, Map<String,String> params) {
+    public JSON mqlwrite(Object query, JSON envelope, Map<String,String> params) {
         if (this.credential_cookie == null) throw new FreebaseException("Can't write without being signed in");
         if (query == null) throw new FreebaseException("Query can't be null");
-        if (envelope == null) envelope = new JSONObject();
+        if (envelope == null) envelope = JSON.o();
         envelope.put("query", jsonize(query));
         envelope.put("escape",false);
 
         List<NameValuePair> qparams = transform_params(params);
-        qparams.add(new BasicNameValuePair("query",envelope.toJSONString()));
+        qparams.add(new BasicNameValuePair("query",envelope.toString()));
 
         return invoke(MQLWRITE_API,qparams,true);
     }
