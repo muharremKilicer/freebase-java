@@ -5,11 +5,11 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.freebase</groupId>
-  <artifactId>java-apis</artifactId>
+  <artifactId>freebase-java</artifactId>
   <name>Freebase Java APIs</name>
   <version>1.0.0</version>
-  <description>Java Library to connect with Freebase APIs</description> 
-  <url></url>
+  <description>Java client API for accessing Freebase.com</description> 
+  <url>http://code.google.com/p/freebase-java/</url>
   <inceptionYear>2009</inceptionYear>
   <packaging>jar</packaging>
 
@@ -97,9 +97,9 @@
       </exclusions>
     </dependency>
     <dependency>
-        <groupId>com.googlecode.json-simple</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>1.1</version>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

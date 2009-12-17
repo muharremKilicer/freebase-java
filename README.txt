@@ -13,6 +13,14 @@
   This is a Java client API for accessing Freebase.com
 
 
+  Where can I get more info?
+  --------------------------
+  
+  Look at the freebase-java web site at
+  
+    http://code.google.com/p/freebase-java/
+    
+
   Licensing and legal issues
   --------------------------
 
