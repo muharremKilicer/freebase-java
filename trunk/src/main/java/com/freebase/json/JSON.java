@@ -30,8 +30,10 @@
 
 package com.freebase.json;
 
+import java.io.IOException;
+import java.io.Reader;
+
 import org.json.simple.JSONArray;
-import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -77,6 +79,11 @@ public class JSON {
     public static JSON parse(String s) throws ParseException {
         JSONParser parser = new JSONParser();
         return new JSON(parser.parse(s));
+    }
+
+    public static JSON parse(Reader r) throws IOException, ParseException {
+        JSONParser parser = new JSONParser();
+        return new JSON(parser.parse(r));
     }
     
     // --------------------------------------------------
@@ -235,28 +242,7 @@ public class JSON {
         }
         return this.bool;
     }
-    
-    public JSONAware json() {
-        if (this.type != Type.OBJECT && this.type != Type.ARRAY) {
-            throw new RuntimeException("This is not an Object or an Array, it's a " + this.type);
-        }
-        return (this.type == Type.OBJECT) ? this.obj : this.array;
-    }
-    
-    public JSONObject obj() {
-        if (this.type != Type.OBJECT) {
-            throw new RuntimeException("This is not an Object, it's a " + this.type);
-        }
-        return this.obj;
-    }
-
-    public JSONArray array() {
-        if (this.type != Type.ARRAY) {
-            throw new RuntimeException("This is not an Array, it's a " + this.type);
-        }
-        return this.array;
-    }
-    
+        
     public boolean isArray() {
         return (this.type == Type.ARRAY);
     }
@@ -345,6 +331,20 @@ public class JSON {
             o = ((JSON) o).value();
         }
         this.array.add(o);
+        return this;
+    }
+    
+    public JSON del(Object o) {
+        if (o instanceof JSON) {
+            o = ((JSON) o).value();
+        }
+        if (this.type == Type.OBJECT) {
+            this.obj.remove(o);
+        } else if (this.type == Type.ARRAY) {
+            this.array.remove(o);
+        } else {
+            throw new RuntimeException("you can remove stuff only from an object or an array");
+        }
         return this;
     }
     

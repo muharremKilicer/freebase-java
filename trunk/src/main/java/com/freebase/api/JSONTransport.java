@@ -55,9 +55,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONAware;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.freebase.json.JSON;
@@ -156,10 +153,9 @@ abstract class JSONTransport {
             HttpResponse response = httpclient.execute(method);
             HttpEntity entity = response.getEntity();
             if (entity != null) {
-                JSONParser parser = new JSONParser();
-                result = new JSON(parser.parse(new InputStreamReader(entity.getContent(),"UTF-8")));
+                result = JSON.parse(new InputStreamReader(entity.getContent(),"UTF-8"));
             } else {
-                result = new JSON(new JSONObject());
+                result = JSON.o();
             }
         } catch (ClientProtocolException e) {
             throw new FreebaseException(e);
@@ -224,14 +220,10 @@ abstract class JSONTransport {
         return qparams;
     }
 
-    protected static JSONAware jsonize(Object json) {
+    protected static JSON jsonize(Object json) {
         if (json instanceof String) {
-            JSONParser parser = new JSONParser();
             try {
-                json = parser.parse((String) json);
-                if (!(json instanceof JSONAware)) {
-                    throw new FreebaseException("Top level JSON object must be an object or an array");
-                }
+                json = JSON.parse((String) json);
             } catch (ParseException e) {
                 throw new FreebaseException("Error during parsing, make sure it's a valid JSON object: " + e.getMessage());
             }
@@ -241,9 +233,8 @@ abstract class JSONTransport {
             if (!j.isContainer()) {
                 throw new FreebaseException("Top level JSON object an object or an array");
             }
-            json = (j.isArray()) ? j.array() : j.obj();
         }
-        return (JSONAware) json;
+        return (JSON) json;
     }
     
     private JSON check_result(JSON result) {
