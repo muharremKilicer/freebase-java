@@ -33,6 +33,8 @@ package com.freebase.json;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * This class is a telescopic (meaning, jQuery-like) wrapper for all
@@ -70,6 +72,13 @@ public class JSON {
     private Number number;
     private boolean bool;
 
+    // --------------------------------------------------
+    
+    public static JSON parse(String s) throws ParseException {
+        JSONParser parser = new JSONParser();
+        return new JSON(parser.parse(s));
+    }
+    
     // --------------------------------------------------
     
     public JSON(Object o) {
@@ -166,6 +175,10 @@ public class JSON {
         }
     }
         
+    public String stringify() {
+        return toString();
+    }
+    
     public String toString() {
         switch (this.type) {
             case BOOLEAN:
