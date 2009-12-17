@@ -65,7 +65,7 @@ Note, of course, that they can be nested
   JSON json = JSON.a("a",JSON.o("b","c")); 
 }}}
 
-which translates as
+which translates to
 
 {{{  
   var json = [ "a" , { "b" : "c" }]; 
