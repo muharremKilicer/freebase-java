@@ -146,7 +146,7 @@ that will return s as
   {"a":"b","c":["1"]}
 }}}
 
-= Using static imports to further compacted syntax =
+= Using static imports to further compact syntax =
 
 One of the new and relatively unknown feature of Java is the ability to load static symbols from other classes as they were defined in your own. This allows us to use JSON.o() as simply o() and JSON.a() as a().
 
