@@ -2,6 +2,7 @@
 
 To use freebase-java with Maven2, you will need to define the freebase-java maven repository in the repositories section of your pom.xml:
 
+{{{
   <repositories>
     <repository>
       <id>freebase-java</id>
@@ -13,10 +14,12 @@ To use freebase-java with Maven2, you will need to define the freebase-java mave
         <enabled>true</enabled>
       </releases>
     </repository>
-</repositories>
+  </repositories>
+}}}
 
 Now, you should define the maven dependency for freebase-java:
 
+{{{
 <dependencies>
     <dependency>
       <groupId>com.freebase</groupId>
@@ -24,5 +27,6 @@ Now, you should define the maven dependency for freebase-java:
       <version>1.0.0</version>
     </dependency>
 </dependencies>
+}}}
 
 That is it, now your maven project is freebase-java enabled. 
