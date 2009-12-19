@@ -74,7 +74,7 @@ import com.freebase.json.JSON;
 public class Freebase extends JSONTransport {
 
     private static final String FREEBASE_API_URL         = "http://api.freebase.com";
-    private static final String FREEBASE_SANDBOX_API_URL = "http://api.freebase-sandbox.com";
+    private static final String FREEBASE_SANDBOX_API_URL = "http://api.sandbox-freebase.com";
 
     private static final String LOGIN_API     = "/api/account/login";
     private static final String MQLREAD_API   = "/api/service/mqlread";
@@ -171,14 +171,14 @@ public class Freebase extends JSONTransport {
     
     // -------------------- MQL read -------------------------------
 
-    public JSON mqlread(Object query) {
+    public JSON mqlread(JSON query) {
         return mqlread(query, null, null);
     }
 
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    public JSON mqlread(Object query, JSON envelope, Map<String,String> params) {
+    public JSON mqlread(JSON query, JSON envelope, Map<String,String> params) {
         if (query == null) throw new FreebaseException("Query can't be null");
         if (envelope == null) envelope = JSON.o();
         envelope.put("query", jsonize(query));
@@ -190,20 +190,20 @@ public class Freebase extends JSONTransport {
         return invoke(MQLREAD_API,qparams);
     }
 
-    public JSON mqlread_multiple(Map<String,Object> queries) {
+    public JSON mqlread_multiple(Map<String,JSON> queries) {
         return mqlread_multiple(queries, null, null);
     }
     
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    public JSON mqlread_multiple(Map<String,Object> queries, Map<String,JSON> envelopes, Map<String,String> params) {
+    public JSON mqlread_multiple(Map<String,JSON> queries, Map<String,JSON> envelopes, Map<String,String> params) {
         if (queries == null || queries.size() == 0) throw new FreebaseException("Query can't be null or empty");
         if (envelopes == null) envelopes = new HashMap<String,JSON>();
         
         JSON q = JSON.o();
         
-        for (Map.Entry<String,Object> entry : queries.entrySet()) {
+        for (Map.Entry<String,JSON> entry : queries.entrySet()) {
             JSON envelope = envelopes.get(entry.getKey());
             if (envelope == null) envelope = JSON.o();
             envelope.put("query", jsonize(entry.getValue()));
@@ -329,11 +329,18 @@ public class Freebase extends JSONTransport {
     }
     
     // --------------------- MQL write ---------------------------------------
+
+    /**
+     * http://www.freebase.com/docs/web_services/mqlwrite
+     */
+    public JSON mqlwrite(JSON query) {
+        return mqlwrite(query,null,null);
+    }
     
     /**
      * http://www.freebase.com/docs/web_services/mqlwrite
      */
-    public JSON mqlwrite(Object query, JSON envelope, Map<String,String> params) {
+    public JSON mqlwrite(JSON query, JSON envelope, Map<String,String> params) {
         if (this.credential_cookie == null) throw new FreebaseException("Can't write without being signed in");
         if (query == null) throw new FreebaseException("Query can't be null");
         if (envelope == null) envelope = JSON.o();
