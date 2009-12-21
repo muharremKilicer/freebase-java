@@ -1,5 +1,7 @@
 #summary How to use freebase-java from Maven
 
+WARNING: this doesn't work yet, but it will once we have a 1.0 release of this API!!
+
 To use freebase-java with Maven2, you will need to define the freebase-java maven repository in the repositories section of your pom.xml:
 
 {{{
