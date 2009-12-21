@@ -3,7 +3,7 @@
 
 = Telescopic JSON API =
 
-While dealing with JSON data in Javascript or Python is simple and natural, dealing with JSON objects in Java is a lot more painful, mostly because all the JSON libraries have different classes for objects {} and arrays [] (which are normally considered as Map and List respectively). This differentiation forces the libraries to return Object classes and you to cast them into their respective types in order to do something with that. The increased verbosity makes it very hard to use JSON in Java like one would in other languages where its syntax is more natural.
+While dealing with JSON data in Javascript or Python is simple and natural, dealing with JSON objects in Java is a lot more painful, mostly because all the JSON libraries have different classes for objects and arrays (which are normally considered as Map and List respectively). This differentiation forces the libraries to return Object classes and you to cast them into their respective types in order to do something with that. The increased verbosity makes it very hard to use JSON in Java like one would in other languages where its syntax is more natural.
 
 Since the Freebase API is heavily based on JSON, we tried hard to find a way for developers to write and manipulate JSON object in a way that follows the Java language restrictions as a strongly typed language, yet reduces the casting and verbosity overhead that other JSON libraries force you to use.
 
