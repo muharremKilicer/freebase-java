@@ -78,7 +78,7 @@ While it's handy to be able to create JSON objects directly, many times you're g
 {{{
   try {
     JSON json = JSON.parse(string);
-  } catch (Exception) {
+  } catch (Exception e) {
     // to deal with eventual parsing problems
   }
 }}}
