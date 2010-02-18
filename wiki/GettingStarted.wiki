@@ -1,4 +1,0 @@
-#summary How to get started with the Freebase API for Java
-#labels Featured
-
-(coming soon)
