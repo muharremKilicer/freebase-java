@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Metaweb Technologies, Inc. All rights reserved.
+ * Copyright (c) 2009-2010, Metaweb Technologies, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,9 +32,13 @@ package com.freebase.json;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -56,7 +60,7 @@ import org.json.simple.parser.ParseException;
  * which is a lot more verbose but still better than having to 
  * deal with all the casting between Map and List and String by hand.
  */
-public class JSON {
+public class JSON implements JSONAware {
 
     public enum Type {
         OBJECT, 
@@ -72,7 +76,7 @@ public class JSON {
     private JSONArray array;
     private String string;
     private Number number;
-    private boolean bool;
+    private Boolean bool;
 
     // --------------------------------------------------
     
@@ -92,10 +96,10 @@ public class JSON {
         if (o == null) {
             throw new RuntimeException("can't wrap a null object");
         } else if (o instanceof JSONObject) {
-            this.obj = (JSONObject) o;
+            this.obj = (JSONObject) JSONize((JSONObject) o);
             this.type = Type.OBJECT;
         } else if (o instanceof JSONArray) {
-            this.array = (JSONArray) o;
+            this.array = (JSONArray) JSONize((JSONArray) o);
             this.type = Type.ARRAY;
         } else if (o instanceof String) {
             this.string = (String) o;
@@ -103,16 +107,14 @@ public class JSON {
         } else if (o instanceof Number) {
             this.number = (Number) o;
             this.type = Type.NUMBER;
+        } else if (o instanceof Boolean) {
+            this.bool = (Boolean) o;
+            this.type = Type.BOOLEAN;
         } else {
             throw new RuntimeException("don't how how to deal with this type of object: " + o);
         }
     }
-        
-    public JSON(boolean bool) {
-        this.bool = bool;
-        this.type = Type.BOOLEAN;
-    }
-    
+            
     // --------------------------------------------------
     
     public JSON get(String key) {
@@ -123,10 +125,12 @@ public class JSON {
             case NUMBER:
                 throw new RuntimeException("Only objects or arrays contain other values");
             case ARRAY:
-                int index = Integer.parseInt(key); 
-                return new JSON(this.array.get(index));
+                int index = Integer.parseInt(key);
+                Object ao = this.array.get(index);
+                return (JSON) ((ao instanceof JSON || ao == null) ? ao : new JSON(ao));
             case OBJECT:
-                return new JSON(this.obj.get(key));
+                Object oo = this.obj.get(key);
+                return (JSON) ((oo instanceof JSON || oo == null) ? oo : new JSON(oo));
             default:
                 // this should never happen but just in case
                 throw new RuntimeException("Don't recognize this object type: " + this.type);
@@ -140,9 +144,11 @@ public class JSON {
             case NUMBER:
                 throw new RuntimeException("Only objects or arrays contain other values");
             case ARRAY:
-                return new JSON(this.array.get(index));
+                Object ao = this.array.get(index);
+                return (JSON) ((ao instanceof JSON || ao == null) ? ao : new JSON(ao));
             case OBJECT:
-                return new JSON(this.obj.get(Integer.toString(index)));
+                Object oo = this.obj.get(Integer.toString(index));
+                return (JSON) ((oo instanceof JSON || oo == null) ? oo : new JSON(oo));
             default:
                 // this should never happen but just in case
                 throw new RuntimeException("Don't recognize this object type: " + this.type);
@@ -150,6 +156,7 @@ public class JSON {
     }
     
     public boolean has(String key) {
+        if (key == null) throw new RuntimeException("Can't ask for a null key");
         switch (this.type) {
             case BOOLEAN:
             case STRING:
@@ -189,11 +196,11 @@ public class JSON {
     public String toString() {
         switch (this.type) {
             case BOOLEAN:
-                return Boolean.toString(this.bool);
+                return JSONValue.toJSONString(this.bool);
             case STRING:
-                return this.string;
+                return JSONValue.toJSONString(this.string);
             case NUMBER:
-                return this.number.toString();
+                return JSONValue.toJSONString(this.number);
             case ARRAY:
                 return this.array.toJSONString();
             case OBJECT:
@@ -202,6 +209,10 @@ public class JSON {
                 // this should never happen but just in case
                 throw new RuntimeException("Don't recognize this object type: " + this.type);
         }
+    }
+
+    public String toJSONString() {
+        return toString();
     }
 
     public Object value() {
@@ -224,25 +235,41 @@ public class JSON {
     
     public String string() {
         if (this.type != Type.STRING) {
-            throw new RuntimeException("This is not a String, it's a " + this.type);
+            throw new RuntimeException("This is not a string, it's a " + this.type);
         }
         return this.string;
     }
     
     public Number number() {
         if (this.type != Type.NUMBER) {
-            throw new RuntimeException("This is not a Number, it's a " + this.type);
+            throw new RuntimeException("This is not a number, it's a " + this.type);
         }
         return this.number;
     }
     
     public boolean bool() {
         if (this.type != Type.BOOLEAN) {
-            throw new RuntimeException("This is not a Boolean, it's a " + this.type);
+            throw new RuntimeException("This is not a boolean, it's a " + this.type);
         }
         return this.bool;
     }
         
+    @SuppressWarnings("unchecked")
+    public Map object() {
+        if (this.type != Type.OBJECT) {
+            throw new RuntimeException("This is not an object, it's a " + this.type);
+        }
+        return this.obj;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List array() {
+        if (this.type != Type.ARRAY) {
+            throw new RuntimeException("This is not an array, it's a " + this.type);
+        }
+        return this.array;
+    }
+    
     public boolean isArray() {
         return (this.type == Type.ARRAY);
     }
@@ -259,6 +286,37 @@ public class JSON {
         return this.type;
     }
         
+    public boolean equals(Object o) {
+        if (o instanceof JSON) {
+            o = ((JSON) o).value();
+        }
+        return this.value().equals(o);
+    }
+
+    // -----------------------------------------------------------------------------------
+
+    @SuppressWarnings("unchecked")
+    private Object JSONize(Object obj) {
+        if (obj instanceof JSONObject) {
+            JSONObject o = (JSONObject) obj;
+            for (Object key : o.keySet()) {
+                Object value = o.get(key);
+                if (value instanceof JSONObject || value instanceof JSONArray) {
+                    o.put(key,new JSON(value));
+                }
+            }
+        } else if (obj instanceof JSONArray) {
+            JSONArray a = (JSONArray) obj;
+            for (int i = 0; i < a.size(); i++) {
+                Object value = a.get(i);
+                if (value instanceof JSONObject || value instanceof JSONArray) {
+                    a.set(i, new JSON(value));
+                }
+            }
+        }
+        return obj;
+    }
+    
     // -----------------------------------------------------------------------------------
         
     public static JSON o() {
@@ -273,8 +331,8 @@ public class JSON {
             if (k == null) {
                 k = o;
             } else {
-                if (o instanceof JSON) {
-                    o = ((JSON) o).value();
+                if (o != null && !(o instanceof JSON)) {
+                    o = new JSON(o);
                 }
                 obj.put(k.toString(),o);
                 k = null;
@@ -294,8 +352,8 @@ public class JSON {
     public static JSON a(Object... objs) {
         JSONArray a = new JSONArray();
         for (Object o : objs) {
-            if (o instanceof JSON) {
-                o = ((JSON) o).value();
+            if (o != null && !(o instanceof JSON)) {
+                o = new JSON(o);
             }
             a.add(o);
         }
@@ -311,8 +369,8 @@ public class JSON {
         if (this.type != Type.OBJECT) {
             throw new RuntimeException("can't add key/value pairs to non-objects types");
         }
-        if (v instanceof JSON) {
-            v = ((JSON) v).value();
+        if (v != null && !(v instanceof JSON)) {
+            v = new JSON(v);
         }
         this.obj.put(k.toString(), v);
         return this;
@@ -322,26 +380,27 @@ public class JSON {
         return _(o);
     }
     
+    public JSON add(Object o) {
+        return _(o);
+    }
+    
     @SuppressWarnings("unchecked")
     public JSON _(Object o) {
         if (this.type != Type.ARRAY) {
             throw new RuntimeException("can't add a single value an object type");
         }
-        if (o instanceof JSON) {
-            o = ((JSON) o).value();
+        if (!(o instanceof JSON)) {
+            o = new JSON(o);
         }
         this.array.add(o);
         return this;
     }
     
     public JSON del(Object o) {
-        if (o instanceof JSON) {
-            o = ((JSON) o).value();
-        }
         if (this.type == Type.OBJECT) {
             this.obj.remove(o);
         } else if (this.type == Type.ARRAY) {
-            this.array.remove(o);
+            this.array.remove(new JSON(o));
         } else {
             throw new RuntimeException("you can remove stuff only from an object or an array");
         }
