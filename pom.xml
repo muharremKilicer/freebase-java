@@ -32,7 +32,7 @@
     <repository>
       <id>local.repo</id>
       <name>file repository to svn</name>
-      <url>file://${basedir}/../mavenrepo</url>
+      <url>file://${basedir}/../repository</url>
     </repository>
   </distributionManagement>
 
