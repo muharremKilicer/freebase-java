@@ -38,7 +38,7 @@ public class Tests {
 
         String name = "test" + System.currentTimeMillis();
         JSON query = o()
-                       ._("create","unless exist")
+                       ._("create","unless_exists")
                        ._("name",name)
                        ._("type","/common/topic")
                        ._("id",null);

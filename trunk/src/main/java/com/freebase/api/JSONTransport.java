@@ -131,6 +131,17 @@ abstract class JSONTransport {
         return check_result(urlfetch(uri,POST,headers,content,sign));
     }
 
+    protected JSON post(String path, List<NameValuePair> params) {
+        return post(path, params, false);
+    }
+    
+    protected JSON post(String path, List<NameValuePair> params, boolean sign) { 
+        String content = URLEncodedUtils.format(params, "UTF-8");
+        
+        String url = getURL(path);
+        return post(url, null, content, sign);
+    }
+    
     private JSON urlfetch(URI uri, int protocol, Map<String,String> headers, CharSequence content, boolean sign) {
         JSON result = null;
         try {
