@@ -227,6 +227,13 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/search
      */
+    public JSON search(String query) {
+        return search(query, null);
+    }
+
+    /**
+     * http://www.freebase.com/docs/web_services/search
+     */
     public JSON search(String query, JSON options) {
         if (query == null || query.trim().length() == 0) throw new FreebaseException("You must provide a string to search");
         
@@ -238,9 +245,16 @@ public class Freebase extends JSONTransport {
     }
  
     // ---------------------- GeoSearch ------------------------------
+
+    /**
+     * http://www.freebase.com/docs/geosearch
+     */
+    public JSON geosearch(String query) {
+        return geosearch(query, null);
+    }
     
     /**
-     * http://www.freebase.com/docs/web_services/geosearch
+     * http://www.freebase.com/docs/geosearch
      */
     public JSON geosearch(String location, JSON options) {
         if (location == null || location.trim().length() == 0) throw new FreebaseException("You must provide a location to geoearch");
@@ -253,6 +267,10 @@ public class Freebase extends JSONTransport {
     }
     
     // ----------------------- Blobs ----------------------------------
+
+    public String get_blob(String id) {
+        return get_blob(id,null);
+    }
     
     /**
      * http://www.freebase.com/docs/web_services/trans_raw
@@ -371,6 +389,13 @@ public class Freebase extends JSONTransport {
     }
     
     // --------------------- Upload ---------------------------------------------
+
+    /**
+     * http://www.freebase.com/docs/web_services/upload
+     */
+    public JSON upload(String content, String media_type) {
+        return upload(content,media_type,null);
+    }
     
     /**
      * http://www.freebase.com/docs/web_services/upload
@@ -386,7 +411,7 @@ public class Freebase extends JSONTransport {
         List<NameValuePair> qparams = transform_params(options);
 
         String url = getURL(UPLOAD_API) + "?" + URLEncodedUtils.format(qparams, "UTF-8");
-        return post(url, null, content, true);
+        return post(url, headers, content, true);
     }
     
 }

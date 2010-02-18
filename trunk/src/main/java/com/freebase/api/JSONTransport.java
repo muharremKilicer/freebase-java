@@ -227,7 +227,7 @@ abstract class JSONTransport {
         if (params != null) {
             for (Object entry : params.object().entrySet()) {
                 Map.Entry<String,JSON> e = (Map.Entry<String,JSON>) entry;
-                qparams.add(new BasicNameValuePair(e.getKey(),e.getValue().string()));
+                qparams.add(new BasicNameValuePair(e.getKey(),e.getValue().value().toString()));
             }
         }
         return qparams;
