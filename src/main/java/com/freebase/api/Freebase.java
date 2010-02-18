@@ -367,7 +367,7 @@ public class Freebase extends JSONTransport {
         List<NameValuePair> qparams = transform_params(params);
         qparams.add(new BasicNameValuePair("query",envelope.toString()));
 
-        return invoke(MQLWRITE_API,qparams,true);
+        return post(MQLWRITE_API,qparams,true);
     }
     
     // --------------------- Upload ---------------------------------------------
