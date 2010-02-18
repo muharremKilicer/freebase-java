@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Metaweb Technologies, Inc. All rights reserved.
+ * Copyright (c) 2009-2010, Metaweb Technologies, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -52,6 +52,9 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.freebase.json.JSON;
 
+import static com.freebase.json.JSON.o;
+import static com.freebase.json.JSON.a;
+
 /**
  * This class is the main access point to the Freebase API.
  * 
@@ -73,8 +76,8 @@ import com.freebase.json.JSON;
  */
 public class Freebase extends JSONTransport {
 
-    private static final String FREEBASE_API_URL         = "http://api.freebase.com";
-    private static final String FREEBASE_SANDBOX_API_URL = "http://api.sandbox-freebase.com";
+    private static final String FREEBASE_API_URL         = "http://www.freebase.com";
+    private static final String FREEBASE_SANDBOX_API_URL = "http://www.sandbox-freebase.com";
 
     private static final String LOGIN_API     = "/api/account/login";
     private static final String MQLREAD_API   = "/api/service/mqlread";
@@ -178,9 +181,9 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    public JSON mqlread(JSON query, JSON envelope, Map<String,String> params) {
+    public JSON mqlread(JSON query, JSON envelope, JSON params) {
         if (query == null) throw new FreebaseException("Query can't be null");
-        if (envelope == null) envelope = JSON.o();
+        if (envelope == null) envelope = o();
         envelope.put("query", jsonize(query));
         envelope.put("escape",false);
 
@@ -190,25 +193,27 @@ public class Freebase extends JSONTransport {
         return invoke(MQLREAD_API,qparams);
     }
 
-    public JSON mqlread_multiple(Map<String,JSON> queries) {
+    public JSON mqlread_multiple(JSON queries) {
         return mqlread_multiple(queries, null, null);
     }
     
     /**
      * http://www.freebase.com/docs/web_services/mqlread
      */
-    public JSON mqlread_multiple(Map<String,JSON> queries, Map<String,JSON> envelopes, Map<String,String> params) {
-        if (queries == null || queries.size() == 0) throw new FreebaseException("Query can't be null or empty");
-        if (envelopes == null) envelopes = new HashMap<String,JSON>();
+    @SuppressWarnings("unchecked")
+    public JSON mqlread_multiple(JSON queries, JSON envelopes, JSON params) {
+        if (queries == null || queries.object().keySet().size() == 0) throw new FreebaseException("Query can't be null or empty");
+        if (envelopes == null) envelopes = o();
         
-        JSON q = JSON.o();
+        JSON q = o();
         
-        for (Map.Entry<String,JSON> entry : queries.entrySet()) {
-            JSON envelope = envelopes.get(entry.getKey());
-            if (envelope == null) envelope = JSON.o();
-            envelope.put("query", jsonize(entry.getValue()));
+        for (Object entry : queries.object().entrySet()) {
+            Map.Entry<String,JSON> e = (Map.Entry<String,JSON>) entry;
+            JSON envelope = envelopes.get(e.getKey());
+            if (envelope == null) envelope = o();
+            envelope.put("query", jsonize(e.getValue()));
             envelope.put("escape",false);
-            q.put(entry.getKey(), envelope);
+            q.put(e.getKey(), envelope);
         }
 
         List<NameValuePair> qparams = transform_params(params);
@@ -222,7 +227,7 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/search
      */
-    public JSON search(String query, Map<String,String> options) {
+    public JSON search(String query, JSON options) {
         if (query == null || query.trim().length() == 0) throw new FreebaseException("You must provide a string to search");
         
         List<NameValuePair> qparams = transform_params(options);
@@ -237,7 +242,7 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/geosearch
      */
-    public JSON geosearch(String location, Map<String,String> options) {
+    public JSON geosearch(String location, JSON options) {
         if (location == null || location.trim().length() == 0) throw new FreebaseException("You must provide a location to geoearch");
         
         List<NameValuePair> qparams = transform_params(options);
@@ -253,10 +258,10 @@ public class Freebase extends JSONTransport {
      * http://www.freebase.com/docs/web_services/trans_raw
      * http://www.freebase.com/docs/web_services/trans_blurb
      */
-    public String get_blob(String id, Map<String,String> options) {
+    public String get_blob(String id, JSON options) {
         if (id == null || id.trim().length() == 0) throw new FreebaseException("You must provide the id of the blob you want");
         String path = BLOB_API_PREFIX;
-        String mode = (options.containsKey("mode")) ? options.get("mode") : "raw";
+        String mode = (options != null && options.has("mode")) ? options.get("mode").string() : "raw";
         if ("raw".equals(mode) || "unsafe".equals(mode) || "blurb".equals(mode)) {
             path += mode;
         } else {
@@ -295,26 +300,38 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/topic_api
      */
-    public JSON get_topic(String id, Map<String,String> options) {
-        if (id == null || id.trim().length() == 0) throw new FreebaseException("Invalid Topic ID");
-        if (id.indexOf(',') > -1) throw new FreebaseException("Use get_topic_multi if you want to retrieve multiple topics");
-        List<String> ids = new ArrayList<String>(1);
-        ids.add(id);
-        return topic(ids,options).get(id);
+    public JSON get_topic(String id) {
+        return get_topic(id, null);
     }
     
     /**
      * http://www.freebase.com/docs/topic_api
      */
-    public JSON get_topic_multiple(List<String> ids, Map<String,String> options) {
-        if (ids == null || ids.size() == 0) throw new FreebaseException("You must provide a non-empty list of Topic IDs");
+    public JSON get_topic(String id, JSON options) {
+        if (id == null || id.trim().length() == 0) throw new FreebaseException("Invalid Topic ID");
+        if (id.indexOf(',') > -1) throw new FreebaseException("Use get_topic_multi if you want to retrieve multiple topics");
+        return topic(a(id),options).get(id);
+    }
+
+    /**
+     * http://www.freebase.com/docs/topic_api
+     */
+    public JSON get_topic_multiple(JSON ids) {
+        return get_topic_multiple(ids, null);
+    }
+    
+    /**
+     * http://www.freebase.com/docs/topic_api
+     */
+    public JSON get_topic_multiple(JSON ids, JSON options) {
+        if (ids == null || ids.array().size() == 0) throw new FreebaseException("You must provide a non-empty array of Topic IDs");
         return topic(ids,options);
     }
     
-    private JSON topic(List<String> ids, Map<String,String> options) {
+    private JSON topic(JSON ids, JSON options) {
 
         String path = TOPIC_API_PREFIX;
-        String mode = (options.containsKey("mode")) ? options.get("mode") : "standard";
+        String mode = (options != null && options.has("mode")) ? options.get("mode").string() : "standard";
         
         if ("standard".equals(mode) || "basic".equals(mode)) {
             path += mode;
@@ -325,7 +342,7 @@ public class Freebase extends JSONTransport {
         List<NameValuePair> qparams = transform_params(options);
         qparams.add(new BasicNameValuePair("id",join(ids,",")));
         
-        return invoke(path,qparams).get("body");
+        return invoke(path,qparams);
     }
     
     // --------------------- MQL write ---------------------------------------
@@ -340,10 +357,10 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/mqlwrite
      */
-    public JSON mqlwrite(JSON query, JSON envelope, Map<String,String> params) {
+    public JSON mqlwrite(JSON query, JSON envelope, JSON params) {
         if (this.credential_cookie == null) throw new FreebaseException("Can't write without being signed in");
         if (query == null) throw new FreebaseException("Query can't be null");
-        if (envelope == null) envelope = JSON.o();
+        if (envelope == null) envelope = o();
         envelope.put("query", jsonize(query));
         envelope.put("escape",false);
 
@@ -358,7 +375,7 @@ public class Freebase extends JSONTransport {
     /**
      * http://www.freebase.com/docs/web_services/upload
      */
-    public JSON upload(String content, String media_type, Map<String,String> options) {
+    public JSON upload(String content, String media_type, JSON options) {
         if (this.credential_cookie == null) throw new FreebaseException("Can't write without being signed in");
         if (content == null || content.trim().length() == 0) throw new FreebaseException("You must specify what content to upload");
         if (media_type == null || media_type.trim().length() == 0) throw new FreebaseException("You must specify a media type for the content to upload");

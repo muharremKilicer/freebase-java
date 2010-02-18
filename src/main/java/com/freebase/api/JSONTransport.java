@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Metaweb Technologies, Inc. All rights reserved.
+ * Copyright (c) 2009-2010, Metaweb Technologies, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,7 +37,6 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -186,10 +185,11 @@ abstract class JSONTransport {
         }
     }
 
-    protected static String join(Collection<String> s, String delimiter) {
-        if (s.isEmpty()) return "";
-        Iterator<String> iter = s.iterator();
-        StringBuffer buffer = new StringBuffer(iter.next());
+    @SuppressWarnings("unchecked")
+    protected static String join(JSON s, String delimiter) {
+        if (s.array().isEmpty()) return "";
+        Iterator<JSON> iter = s.array().iterator();
+        StringBuffer buffer = new StringBuffer(iter.next().string());
         while (iter.hasNext()) {
             buffer.append(delimiter).append(iter.next());
         }
@@ -210,11 +210,13 @@ abstract class JSONTransport {
         return output.toString();
     }
     
-    protected static List<NameValuePair> transform_params(Map<String,String> params) {
+    @SuppressWarnings("unchecked")
+    protected static List<NameValuePair> transform_params(JSON params) {
         List<NameValuePair> qparams = new ArrayList<NameValuePair>();
         if (params != null) {
-            for (Map.Entry<String,String> entry : params.entrySet()) {
-                qparams.add(new BasicNameValuePair(entry.getKey(),entry.getValue()));
+            for (Object entry : params.object().entrySet()) {
+                Map.Entry<String,JSON> e = (Map.Entry<String,JSON>) entry;
+                qparams.add(new BasicNameValuePair(e.getKey(),e.getValue().string()));
             }
         }
         return qparams;
@@ -237,27 +239,34 @@ abstract class JSONTransport {
         return (JSON) json;
     }
     
+    @SuppressWarnings("unchecked")
     private JSON check_result(JSON result) {
 
-        String status = result.get("status").string();
-        String code = result.get("code").string();
-        
-        if (!"200 OK".equals(status) || !"/api/status/ok".equals(code)) {
-
-            String message = code;
-            if (!"200 OK".equals(status)) {
-                message = "HTTP error: " + status;
-            } else {
-                JSON firstMessage = result.get("messages").get(0);
-                if (firstMessage.has("message")) {
-                    message = code + ": " + firstMessage.get("message").string();
-                }
-            }
-
-            throw new FreebaseException(message, result);
-        }
-
-        return result;
-    }
+        if (result.has("status")) {
+            String status = result.get("status").string();
+            String code = result.get("code").string();
+            
+            if (!"200 OK".equals(status) || !"/api/status/ok".equals(code)) {
     
+                String message = code;
+                if (!"200 OK".equals(status)) {
+                    message = "HTTP error: " + status;
+                } else {
+                    JSON firstMessage = result.get("messages").get(0);
+                    if (firstMessage.has("message")) {
+                        message = code + ": " + firstMessage.get("message").string();
+                    }
+                }
+    
+                throw new FreebaseException(message, result);
+            }
+        } else {
+            for (Object e : result.object().entrySet()) {
+                Map.Entry<String, JSON> entry = (Map.Entry<String, JSON>) e;
+                check_result(entry.getValue());
+            }
+        }
+        
+        return result;
+    }    
 }

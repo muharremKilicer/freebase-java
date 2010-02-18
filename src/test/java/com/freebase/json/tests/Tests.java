@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import com.freebase.json.JSON;
 
-
 public class Tests {
 
     String json1 = "{ 'id' : null , 'limit' : 1 }".replace('\'', '"');
     String json2 = "[{ 'a' : 1 , 'b' : true , 'c' : null , 'd' : { 'a1' : [ 'blah' ] }}]".replace('\'', '"');
     String json3 = "{ 'a' : 'b' , 'c' : [ 'd' , 'f' ]}".replace('\'', '"');
     String json4 = "{ 'c' : [ 'f' ]}".replace('\'', '"');
+    String json5 = "[ 1 , null, { 'blah' : 'blah' }]".replace('\'', '"');
     
     @Test public void test_JSON_parser() throws ParseException {
         JSONParser parser = new JSONParser();
@@ -27,7 +27,7 @@ public class Tests {
     
     @Test public void test_JSON_constructors_1() throws ParseException {
         // make the json object by using the o/a notation
-        JSON j1 = JSON.o("id",null,"limit",1);
+        JSON j1 = o("id",null,"limit",1);
 
         // make the json object parsing the javascript syntax from a string 
         JSON j2 = JSON.parse(json1);
@@ -42,7 +42,7 @@ public class Tests {
         
         // make the json object parsing the javascript syntax from a string 
         JSON j2 = JSON.parse(json2);
-
+        
         // make sure they serialize the same
         assertTrue(j1.toString().equals(j2.toString()));
     }
@@ -53,17 +53,6 @@ public class Tests {
 
         // make the json object parsing the javascript syntax from a string 
         JSON j2 = JSON.parse(json2);
-
-        // make sure they serialize the same
-        assertTrue(j1.toString().equals(j2.toString()));
-    }
-
-    @Test public void test_JSON_augmenter_2() throws ParseException {
-        // make the json object by using the o/a notation
-        JSON j1 = JSON.o("id",null,"limit",1);
-
-        // make the json object parsing the javascript syntax from a string 
-        JSON j2 = JSON.parse(json1);
 
         // make sure they serialize the same
         assertTrue(j1.toString().equals(j2.toString()));
@@ -82,5 +71,20 @@ public class Tests {
         // make sure they serialize the same
         assertTrue(j1.toString().equals(j2.toString()));
     }
+    
+    @Test public void test_JSON_remover_2() throws ParseException {
+        // make the json object parsing the javascript syntax from a string 
+        JSON j1 = a(1,null,"b",o("blah","blah"));
+        
+        // modify the object
+        j1.del("b");
+
+        // make the json object parsing the javascript syntax from a string 
+        JSON j2 = JSON.parse(json5);
+                
+        // make sure they serialize the same
+        assertTrue(j1.toString().equals(j2.toString()));
+    }
+    
 }
 
