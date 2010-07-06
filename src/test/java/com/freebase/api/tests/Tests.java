@@ -25,6 +25,15 @@ public class Tests {
         assertTrue("/user/root".equals(response.get("result").get("id").string()));
     }
 
+    @Test public void testMQLReadWithCursors() {
+        Freebase freebase = Freebase.getFreebase();
+        JSON query = o("id",null,"limit",1);
+        JSON envelope = o("cursor",true);
+        JSON response = freebase.mqlread(query, envelope, null);
+        String cursor = response.get("cursor").string();
+        assertTrue(cursor != null);
+    }
+    
     @Test public void testSearch() {
         Freebase freebase = Freebase.getFreebase();
         JSON result = freebase.search("blade runner");
