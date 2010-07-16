@@ -3,6 +3,7 @@ package com.freebase.json.tests;
 import static com.freebase.json.JSON.a;
 import static com.freebase.json.JSON.o;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -85,6 +86,66 @@ public class Tests {
         // make sure they serialize the same
         assertTrue(j1.toString().equals(j2.toString()));
     }
-    
+
+  @Test public void test_JSON_array_has_str_1() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has("-1"));
+  }
+  @Test public void test_JSON_array_has_str_2() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has("0"));
+  }
+  @Test public void test_JSON_array_has_str_3() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has("1"));
+  }
+
+  @Test public void test_JSON_array_has_str_4() throws ParseException {
+    // make the json array with length of 1
+      JSON j = a("foo");
+
+      // make sure has(..) finds one element
+      assertTrue("has(0) returned false on 1 element array", j.has("0"));
+  }
+
+
+  @Test public void test_JSON_array_has_int_1() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has(-1));
+  }
+  @Test public void test_JSON_array_has_int_2() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has(0));
+  }
+  @Test public void test_JSON_array_has_int_3() throws ParseException {
+      // make the json empty array
+      JSON j = a();
+
+      // make sure has(..) returns false
+      assertFalse("has() returned true on empty array", j.has(1));
+  }
+  @Test public void test_JSON_array_has_int_4() throws ParseException {
+      // make the json array with length of 1
+      JSON j = a("foo");
+
+      // make sure has(..) finds one element
+      assertTrue("has(0) returned false on 1 element array", j.has(0));
+  }
+
 }
 
