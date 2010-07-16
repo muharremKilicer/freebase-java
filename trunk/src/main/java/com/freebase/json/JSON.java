@@ -164,7 +164,7 @@ public class JSON implements JSONAware {
                 return false;
             case ARRAY:
                 int index = Integer.parseInt(key); 
-                return (index > 0 && index < this.array.size());
+                return (index >= 0 && index < this.array.size());
             case OBJECT:
                 return this.obj.containsKey(key);
             default:
@@ -180,7 +180,7 @@ public class JSON implements JSONAware {
             case NUMBER:
                 return false;
             case ARRAY:
-                return (index > 0 && index < this.array.size());
+                return (index >= 0 && index < this.array.size());
             case OBJECT:
                 return this.obj.containsKey(Integer.toString(index));
             default:
