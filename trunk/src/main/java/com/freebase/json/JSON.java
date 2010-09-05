@@ -255,7 +255,7 @@ public class JSON implements JSONAware {
     }
         
     @SuppressWarnings("unchecked")
-    public Map object() {
+	public Map<?,JSON> object() {
         if (this.type != Type.OBJECT) {
             throw new RuntimeException("This is not an object, it's a " + this.type);
         }
@@ -263,7 +263,7 @@ public class JSON implements JSONAware {
     }
     
     @SuppressWarnings("unchecked")
-    public List array() {
+	public List<JSON> array() {
         if (this.type != Type.ARRAY) {
             throw new RuntimeException("This is not an array, it's a " + this.type);
         }
