@@ -196,7 +196,6 @@ abstract class JSONTransport {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected static String join(JSON s, String delimiter) {
         if (s.array().isEmpty()) return "";
         Iterator<JSON> iter = s.array().iterator();
